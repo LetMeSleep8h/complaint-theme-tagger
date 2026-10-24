@@ -80,5 +80,16 @@ $("run").addEventListener("click",()=>{
 });
 function dl(name,text){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"text/csv"}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);}
 $("dl").addEventListener("click",()=>dl("tagged-complaints.csv",ComplaintThemeTagger.taggedToCSV(last)));
+// per-complaint tag overrides, page memory only (#3): removing a tag drops
+// it from that complaint's download without touching the tagging rules
+const tagOverrides=new Map();
+document.getElementById("results").addEventListener("click",(e)=>{
+  const btn=e.target.closest(".tagx"); if(!btn) return;
+  const text=btn.dataset.text, tag=btn.dataset.tag;
+  if(!tagOverrides.has(text)) tagOverrides.set(text,new Set());
+  tagOverrides.get(text).add(tag);
+  last=ComplaintThemeTagger.removeTags(last,tagOverrides);
+  document.getElementById("run").click();
+});
 </script>
 </body></html>

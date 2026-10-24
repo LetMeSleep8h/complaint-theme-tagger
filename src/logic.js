@@ -88,6 +88,16 @@ function taggedToCSV(tagged) {
   }
   return lines.join("\n") + "\n";
 }
-const api = { DEFAULT_TAXONOMY, PROMISE_PHRASES, OUTCOME_PHRASES, defaultTaxonomy, parseTaxonomyJSON, parseCSV, parseComplaints, tagComplaint, tagComplaints, summarize, trendByMonth, monthOf, taggedToCSV };
+function removeTags(tagged, overrides) {
+    // Overrides are the reviewer's per-complaint edits, kept in page memory
+    // only: each entry maps a complaint's text to the theme ids removed from
+    // its download.
+    return (tagged || []).map((t) => {
+        const removed = overrides.get(t.text);
+        if (!removed) return t;
+        return { ...t, themes: t.themes.filter((id) => !removed.has(id)) };
+    });
+}
+const api = { DEFAULT_TAXONOMY, PROMISE_PHRASES, OUTCOME_PHRASES, defaultTaxonomy, parseTaxonomyJSON, parseCSV, parseComplaints, tagComplaint, tagComplaints, summarize, trendByMonth, monthOf, taggedToCSV, removeTags };
 if (typeof module !== "undefined" && module.exports) { module.exports = api; }
 if (typeof window !== "undefined") { window.ComplaintThemeTagger = api; }

@@ -51,3 +51,13 @@ test("the Spanish keyword pack tags synthetic Spanish complaints", () => {
   const r = L.tagComplaint({ text: "pagué y nunca prestaron el servicio, no hicieron nada" }, tax);
   assert.deepEqual(r.themes, ["es-servicios-no-prestados"]);
 });
+test("removeTags drops overridden themes, page memory only", () => {
+  const tagged = L.tagComplaints([{ text: "charged a fee and no reply" }]);
+  const overrides = new Map([[tagged[0].text, new Set(["fees-and-charges"])]]);
+  const cleaned = L.removeTags(tagged, overrides);
+  assert.deepEqual(cleaned[0].themes, ["communication-problems"]);
+  // the original list is untouched: overrides are a view for the download
+  assert.ok(tagged[0].themes.includes("fees-and-charges"));
+  // complaints without an override pass through
+  assert.deepEqual(L.removeTags([{ text: "other", themes: ["fees-and-charges"] }], overrides)[0].themes, ["fees-and-charges"]);
+});
